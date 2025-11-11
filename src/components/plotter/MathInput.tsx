@@ -58,12 +58,25 @@ export const MathInput = forwardRef<MathInputRef, MathInputProps>(
       const mf = mathfieldRef.current;
       if (!mf) return;
 
-      // Configure the mathfield
+      // Configure the mathfield with inline shortcuts
       mf.mathVirtualKeyboardPolicy = 'auto';
       mf.smartFence = true;
       mf.smartMode = true;
       mf.smartSuperscript = true;
       mf.removeExtraneousParentheses = true;
+
+      // Enable inline shortcuts for common functions
+      mf.inlineShortcuts = {
+        sqrt: '\\sqrt',
+        pi: '\\pi',
+        theta: '\\theta',
+        alpha: '\\alpha',
+        beta: '\\beta',
+        gamma: '\\gamma',
+        delta: '\\delta',
+        inf: '\\infty',
+        infinity: '\\infty',
+      };
 
       // Set initial value
       if (value) {
@@ -75,7 +88,7 @@ export const MathInput = forwardRef<MathInputRef, MathInputProps>(
         setTimeout(() => mf.focus(), 100);
       }
 
-      // Handle input events
+      // Handle input events - fire on every keystroke
       const handleInput = () => {
         const latex = mf.getValue();
         onChange?.(latex);

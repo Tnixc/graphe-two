@@ -104,7 +104,7 @@ export const Plot3D = memo(function Plot3D({
   };
 
   return (
-    <div className="w-full bg-card rounded-lg border">
+    <div className="w-full h-full bg-card rounded-lg border overflow-hidden">
       <Plot
         data={data}
         layout={layout}
