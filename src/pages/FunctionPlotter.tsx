@@ -31,7 +31,7 @@ const DEFAULT_PARAMETERS: PlotParameters = {
 const generateId = () => Math.random().toString(36).substring(2, 11);
 
 /**
- * Main 3D Function Plotter page
+ * Main 3D Function Plotter page - Full screen layout
  */
 export default function FunctionPlotter() {
   // State for functions
@@ -163,111 +163,53 @@ export default function FunctionPlotter() {
   }, [parameters.autoZRange, parameters.zMin, parameters.zMax]);
 
   return (
-    <div className="container mx-auto p-4 space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">3D Function Plotter</h1>
-          <p className="text-muted-foreground">
-            Visualize mathematical functions in 3D space
-          </p>
-        </div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <Info className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-sm">
-              <div className="space-y-2 text-sm">
-                <p className="font-semibold">Quick Guide:</p>
-                <ul className="list-disc list-inside space-y-1 text-xs">
-                  <li>Enter functions using x and y variables</li>
-                  <li>Use standard math notation: sin, cos, tan, exp, log, sqrt, abs, etc.</li>
-                  <li>Try examples: sin(x*y), x^2 - y^2, atan2(y,x)</li>
-                  <li>Add multiple functions to compare them</li>
-                  <li>Adjust domain and resolution for better detail</li>
-                  <li>Rotate the plot by clicking and dragging</li>
-                </ul>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-
-      {/* Main content area */}
-      <div className="grid lg:grid-cols-[1fr_350px] gap-4">
-        {/* Plot area */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
+    <div className="h-screen w-screen flex overflow-hidden bg-background">
+      {/* Left sidebar - Controls */}
+      <div className="w-[380px] border-r border-border overflow-y-auto flex-shrink-0">
+        <div className="p-4 space-y-4">
+          {/* Header */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h1 className="text-xl font-bold">3D Function Plotter</h1>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <Info className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-sm" side="right">
+                    <div className="space-y-2 text-sm">
+                      <p className="font-semibold">Quick Guide:</p>
+                      <ul className="list-disc list-inside space-y-1 text-xs">
+                        <li>Enter functions using x and y variables</li>
+                        <li>Use: sin, cos, tan, exp, log, sqrt, abs, etc.</li>
+                        <li>Try: sin(x*y), x^2 - y^2, atan2(y,x)</li>
+                        <li>Add multiple functions to compare</li>
+                        <li>Rotate plot by clicking and dragging</li>
+                      </ul>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary">
+              <Badge variant="secondary" className="text-xs">
                 {functions.filter((f) => f.visible).length} visible
               </Badge>
               {isComputing && (
-                <Badge variant="outline" className="flex items-center gap-1">
+                <Badge variant="outline" className="flex items-center gap-1 text-xs">
                   <RefreshCw className="h-3 w-3 animate-spin" />
                   Computing...
                 </Badge>
               )}
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={computePlotData}
-              disabled={isComputing}
-            >
-              <RefreshCw className={`h-4 w-4 mr-1 ${isComputing ? 'animate-spin' : ''}`} />
-              Replot
-            </Button>
           </div>
 
-          {/* 3D Plot */}
-          <Plot3D functions={plotFunctions} zRange={zRange} />
-
-          {/* Examples section */}
-          <div className="p-4 bg-muted/50 rounded-lg">
-            <h3 className="text-sm font-semibold mb-2">Example Functions:</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              <button
-                className="text-left p-2 hover:bg-background rounded border border-transparent hover:border-border transition-colors"
-                onClick={() => updateFunction(functions[0].id, { expression: 'sin(x) * cos(y)' })}
-              >
-                <code className="font-mono">sin(x) * cos(y)</code>
-                <p className="text-muted-foreground mt-1">Wave pattern</p>
-              </button>
-              <button
-                className="text-left p-2 hover:bg-background rounded border border-transparent hover:border-border transition-colors"
-                onClick={() => updateFunction(functions[0].id, { expression: 'x^2 + y^2' })}
-              >
-                <code className="font-mono">x^2 + y^2</code>
-                <p className="text-muted-foreground mt-1">Paraboloid</p>
-              </button>
-              <button
-                className="text-left p-2 hover:bg-background rounded border border-transparent hover:border-border transition-colors"
-                onClick={() => updateFunction(functions[0].id, { expression: 'sin(sqrt(x^2 + y^2))' })}
-              >
-                <code className="font-mono">sin(sqrt(x^2 + y^2))</code>
-                <p className="text-muted-foreground mt-1">Ripple effect</p>
-              </button>
-              <button
-                className="text-left p-2 hover:bg-background rounded border border-transparent hover:border-border transition-colors"
-                onClick={() => updateFunction(functions[0].id, { expression: 'atan2(y, x)' })}
-              >
-                <code className="font-mono">atan2(y, x)</code>
-                <p className="text-muted-foreground mt-1">Angle field (use HSV colormap)</p>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Controls sidebar */}
-        <div className="space-y-4">
           {/* Function inputs */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Functions</h2>
+              <h2 className="text-base font-semibold">Functions</h2>
               <Button size="sm" onClick={addFunction} disabled={functions.length >= 5}>
                 <Plus className="h-4 w-4 mr-1" />
                 Add
@@ -296,6 +238,65 @@ export default function FunctionPlotter() {
             parameters={parameters}
             onUpdate={updateParameters}
             onReset={resetParameters}
+          />
+
+          {/* Examples section */}
+          <div className="pt-4 border-t">
+            <h3 className="text-sm font-semibold mb-2">Examples:</h3>
+            <div className="space-y-1">
+              <button
+                className="w-full text-left p-2 hover:bg-muted rounded text-xs transition-colors"
+                onClick={() => updateFunction(functions[0].id, { expression: 'sin(x) * cos(y)' })}
+              >
+                <code className="font-mono text-xs">sin(x) * cos(y)</code>
+              </button>
+              <button
+                className="w-full text-left p-2 hover:bg-muted rounded text-xs transition-colors"
+                onClick={() => updateFunction(functions[0].id, { expression: 'x^2 + y^2' })}
+              >
+                <code className="font-mono text-xs">x^2 + y^2</code>
+              </button>
+              <button
+                className="w-full text-left p-2 hover:bg-muted rounded text-xs transition-colors"
+                onClick={() => updateFunction(functions[0].id, { expression: 'sin(sqrt(x^2 + y^2))' })}
+              >
+                <code className="font-mono text-xs">sin(sqrt(x^2 + y^2))</code>
+              </button>
+              <button
+                className="w-full text-left p-2 hover:bg-muted rounded text-xs transition-colors"
+                onClick={() => updateFunction(functions[0].id, { expression: 'atan2(y, x)' })}
+              >
+                <code className="font-mono text-xs">atan2(y, x)</code>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right side - Plot area (takes remaining space) */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top bar */}
+        <div className="flex-shrink-0 border-b border-border px-4 py-2 flex items-center justify-between bg-background">
+          <div className="text-sm text-muted-foreground">
+            Drag to rotate • Scroll to zoom • Double-click to reset
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={computePlotData}
+            disabled={isComputing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-1 ${isComputing ? 'animate-spin' : ''}`} />
+            Replot
+          </Button>
+        </div>
+
+        {/* 3D Plot - fills remaining space */}
+        <div className="flex-1 p-4 overflow-hidden">
+          <Plot3D
+            functions={plotFunctions}
+            zRange={zRange}
+            height="100%"
           />
         </div>
       </div>
