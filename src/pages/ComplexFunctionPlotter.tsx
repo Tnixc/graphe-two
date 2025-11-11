@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, RefreshCw, Info } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, RefreshCw, Info, Calculator, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -8,6 +9,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { ComplexFunctionInput, type ComplexFunctionData } from '@/components/plotter/ComplexFunctionInput';
 import { ParameterControls, type PlotParameters } from '@/components/plotter/ParameterControls';
 import { ComplexPlot3D, type ComplexPlotFunction } from '@/components/plotter/ComplexPlot3D';
@@ -35,6 +44,8 @@ const generateId = () => Math.random().toString(36).substring(2, 11);
  * Height represents Re(f(z)), color represents Im(f(z)) as phase
  */
 export default function ComplexFunctionPlotter() {
+  const navigate = useNavigate();
+
   // State for functions
   const [functions, setFunctions] = useState<ComplexFunctionData[]>([
     {
@@ -308,15 +319,42 @@ export default function ComplexFunctionPlotter() {
           <div className="text-xs text-muted-foreground sm:hidden">
             Drag to rotate
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={computePlotData}
-            disabled={isComputing}
-          >
-            <RefreshCw className={`h-4 w-4 mr-1 ${isComputing ? 'animate-spin' : ''}`} />
-            Replot
-          </Button>
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Calculator className="h-4 w-4" />
+                  <span className="hidden sm:inline">Complex Functions</span>
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Function Type</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/')}>
+                  <div className="flex flex-col">
+                    <span className="font-medium">Real Functions</span>
+                    <span className="text-xs text-muted-foreground">Plot real-valued functions</span>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/complex')} className="bg-muted">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Complex Functions</span>
+                    <span className="text-xs text-muted-foreground">Plot complex-valued functions</span>
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={computePlotData}
+              disabled={isComputing}
+            >
+              <RefreshCw className={`h-4 w-4 mr-1 ${isComputing ? 'animate-spin' : ''}`} />
+              Replot
+            </Button>
+          </div>
         </div>
 
         {/* 3D Plot - fills remaining space */}
