@@ -38,7 +38,7 @@ export default function FunctionPlotter() {
   const [functions, setFunctions] = useState<FunctionData[]>([
     {
       id: generateId(),
-      expression: 'sin(sqrt(x^2 + y^2)) / sqrt(x^2 + y^2)',
+      expression: '',
       colormap: defaultColormaps.general,
       opacity: 0.9,
       visible: true,
@@ -163,9 +163,9 @@ export default function FunctionPlotter() {
   }, [parameters.autoZRange, parameters.zMin, parameters.zMax]);
 
   return (
-    <div className="h-screen w-screen flex overflow-hidden bg-background">
+    <div className="h-screen w-screen flex flex-col md:flex-row overflow-hidden bg-background">
       {/* Left sidebar - Controls */}
-      <div className="w-[380px] border-r border-border overflow-y-auto flex-shrink-0">
+      <div className="w-full md:w-[380px] border-r border-border overflow-y-auto flex-shrink-0 md:h-screen h-auto max-h-[40vh] md:max-h-none">
         <div className="p-4 space-y-4">
           {/* Header */}
           <div className="space-y-2">
@@ -274,11 +274,14 @@ export default function FunctionPlotter() {
       </div>
 
       {/* Right side - Plot area (takes remaining space) */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
         {/* Top bar */}
         <div className="flex-shrink-0 border-b border-border px-4 py-2 flex items-center justify-between bg-background">
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground hidden sm:block">
             Drag to rotate • Scroll to zoom • Double-click to reset
+          </div>
+          <div className="text-xs text-muted-foreground sm:hidden">
+            Drag to rotate
           </div>
           <Button
             size="sm"

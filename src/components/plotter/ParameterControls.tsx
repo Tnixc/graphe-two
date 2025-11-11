@@ -49,32 +49,48 @@ export function ParameterControls({
       </div>
 
       {/* X Domain */}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">X Domain</Label>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <Label htmlFor="xMin" className="text-xs text-muted-foreground">
+      <div className="space-y-3">
+        <Label className="text-sm font-medium">X Axis</Label>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="xMin" className="text-xs text-muted-foreground w-10">
               Min
             </Label>
+            <Slider
+              min={-20}
+              max={0}
+              step={0.5}
+              value={[parameters.xMin]}
+              onValueChange={([value]) => onUpdate({ xMin: value })}
+              className="flex-1"
+            />
             <Input
               id="xMin"
               type="number"
               value={parameters.xMin}
               onChange={(e) => handleNumberInput('xMin', e.target.value)}
-              className="h-8"
+              className="h-7 w-16 text-xs"
               step="0.1"
             />
           </div>
-          <div>
-            <Label htmlFor="xMax" className="text-xs text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="xMax" className="text-xs text-muted-foreground w-10">
               Max
             </Label>
+            <Slider
+              min={0}
+              max={20}
+              step={0.5}
+              value={[parameters.xMax]}
+              onValueChange={([value]) => onUpdate({ xMax: value })}
+              className="flex-1"
+            />
             <Input
               id="xMax"
               type="number"
               value={parameters.xMax}
               onChange={(e) => handleNumberInput('xMax', e.target.value)}
-              className="h-8"
+              className="h-7 w-16 text-xs"
               step="0.1"
             />
           </div>
@@ -82,32 +98,48 @@ export function ParameterControls({
       </div>
 
       {/* Y Domain */}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Y Domain</Label>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <Label htmlFor="yMin" className="text-xs text-muted-foreground">
+      <div className="space-y-3">
+        <Label className="text-sm font-medium">Y Axis</Label>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="yMin" className="text-xs text-muted-foreground w-10">
               Min
             </Label>
+            <Slider
+              min={-20}
+              max={0}
+              step={0.5}
+              value={[parameters.yMin]}
+              onValueChange={([value]) => onUpdate({ yMin: value })}
+              className="flex-1"
+            />
             <Input
               id="yMin"
               type="number"
               value={parameters.yMin}
               onChange={(e) => handleNumberInput('yMin', e.target.value)}
-              className="h-8"
+              className="h-7 w-16 text-xs"
               step="0.1"
             />
           </div>
-          <div>
-            <Label htmlFor="yMax" className="text-xs text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="yMax" className="text-xs text-muted-foreground w-10">
               Max
             </Label>
+            <Slider
+              min={0}
+              max={20}
+              step={0.5}
+              value={[parameters.yMax]}
+              onValueChange={([value]) => onUpdate({ yMax: value })}
+              className="flex-1"
+            />
             <Input
               id="yMax"
               type="number"
               value={parameters.yMax}
               onChange={(e) => handleNumberInput('yMax', e.target.value)}
-              className="h-8"
+              className="h-7 w-16 text-xs"
               step="0.1"
             />
           </div>
@@ -192,7 +224,7 @@ export function ParameterControls({
       {/* Info */}
       <div className="pt-2 border-t">
         <p className="text-xs text-muted-foreground">
-          Higher resolution = smoother plots but slower performance. Start with 50-100 for testing.
+          Use sliders for quick adjustments. Higher resolution = smoother plots but slower.
         </p>
       </div>
     </Card>
