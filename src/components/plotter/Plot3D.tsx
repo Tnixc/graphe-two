@@ -1,6 +1,7 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import Plot from 'react-plotly.js';
 import type { GridData } from '@/utils/gridGenerator';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export interface PlotFunction {
   id: string;
@@ -29,6 +30,9 @@ export const Plot3D = memo(function Plot3D({
   width = '100%',
   height = 600,
 }: Plot3DProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
   // Convert functions to Plotly data traces
   const data: any[] = functions
     .filter((f) => f.visible)
@@ -45,10 +49,11 @@ export const Plot3D = memo(function Plot3D({
     }));
 
   // Calculate z-axis range
-  let zAxisRange: [number, number] | undefined;
-  if (zRange !== 'auto' && zRange) {
-    zAxisRange = [zRange.min, zRange.max];
-  } else {
+  const zAxisRange: [number, number] | undefined = useMemo(() => {
+    if (zRange !== 'auto' && zRange) {
+      return [zRange.min, zRange.max];
+    }
+
     // Auto-calculate from data
     let minZ = Infinity;
     let maxZ = -Infinity;
@@ -59,31 +64,32 @@ export const Plot3D = memo(function Plot3D({
         maxZ = Math.max(maxZ, func.gridData.zMax);
       });
     if (isFinite(minZ) && isFinite(maxZ)) {
-      zAxisRange = [minZ, maxZ];
+      return [minZ, maxZ];
     }
-  }
+    return undefined;
+  }, [functions, zRange]);
 
-  const layout: any = {
+  const layout: any = useMemo(() => ({
     autosize: true,
     margin: { l: 0, r: 0, b: 0, t: 0 },
     scene: {
       xaxis: {
         title: 'x',
-        gridcolor: 'rgb(200, 200, 200)',
+        gridcolor: isDark ? 'rgb(73, 73, 73)' : 'rgb(236, 236, 236)',
         showbackground: true,
-        backgroundcolor: 'rgb(240, 240, 240)',
+        backgroundcolor: isDark ? 'rgb(37, 37, 37)' : 'rgb(249, 249, 249)',
       },
       yaxis: {
         title: 'y',
-        gridcolor: 'rgb(200, 200, 200)',
+        gridcolor: isDark ? 'rgb(73, 73, 73)' : 'rgb(236, 236, 236)',
         showbackground: true,
-        backgroundcolor: 'rgb(240, 240, 240)',
+        backgroundcolor: isDark ? 'rgb(37, 37, 37)' : 'rgb(249, 249, 249)',
       },
       zaxis: {
         title: 'z',
-        gridcolor: 'rgb(200, 200, 200)',
+        gridcolor: isDark ? 'rgb(73, 73, 73)' : 'rgb(236, 236, 236)',
         showbackground: true,
-        backgroundcolor: 'rgb(240, 240, 240)',
+        backgroundcolor: isDark ? 'rgb(37, 37, 37)' : 'rgb(249, 249, 249)',
         range: zAxisRange,
       },
       camera: {
@@ -94,7 +100,7 @@ export const Plot3D = memo(function Plot3D({
     },
     paper_bgcolor: 'transparent',
     plot_bgcolor: 'transparent',
-  };
+  }), [isDark, zAxisRange]);
 
   const config: any = {
     responsive: true,

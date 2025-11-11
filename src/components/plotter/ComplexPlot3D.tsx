@@ -1,6 +1,7 @@
 import { memo, useMemo } from 'react';
 import Plot from 'react-plotly.js';
 import type { ComplexGridData } from '@/utils/complexGridGenerator';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export interface ComplexPlotFunction {
   id: string;
@@ -72,6 +73,9 @@ export const ComplexPlot3D = memo(function ComplexPlot3D({
   width = '100%',
   height = 600,
 }: ComplexPlot3DProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
   // Convert functions to Plotly data traces
   const data: any[] = useMemo(() => {
     return functions
@@ -129,27 +133,27 @@ export const ComplexPlot3D = memo(function ComplexPlot3D({
     return undefined;
   }, [functions, zRange]);
 
-  const layout: any = {
+  const layout: any = useMemo(() => ({
     autosize: true,
     margin: { l: 0, r: 0, b: 0, t: 0 },
     scene: {
       xaxis: {
         title: 'Re(z)',
-        gridcolor: 'rgb(200, 200, 200)',
+        gridcolor: isDark ? 'rgb(73, 73, 73)' : 'rgb(236, 236, 236)',
         showbackground: true,
-        backgroundcolor: 'rgb(240, 240, 240)',
+        backgroundcolor: isDark ? 'rgb(37, 37, 37)' : 'rgb(249, 249, 249)',
       },
       yaxis: {
         title: 'Im(z)',
-        gridcolor: 'rgb(200, 200, 200)',
+        gridcolor: isDark ? 'rgb(73, 73, 73)' : 'rgb(236, 236, 236)',
         showbackground: true,
-        backgroundcolor: 'rgb(240, 240, 240)',
+        backgroundcolor: isDark ? 'rgb(37, 37, 37)' : 'rgb(249, 249, 249)',
       },
       zaxis: {
         title: 'Re(f(z))',
-        gridcolor: 'rgb(200, 200, 200)',
+        gridcolor: isDark ? 'rgb(73, 73, 73)' : 'rgb(236, 236, 236)',
         showbackground: true,
-        backgroundcolor: 'rgb(240, 240, 240)',
+        backgroundcolor: isDark ? 'rgb(37, 37, 37)' : 'rgb(249, 249, 249)',
         range: zAxisRange,
       },
       camera: {
@@ -160,7 +164,7 @@ export const ComplexPlot3D = memo(function ComplexPlot3D({
     },
     paper_bgcolor: 'transparent',
     plot_bgcolor: 'transparent',
-  };
+  }), [isDark, zAxisRange]);
 
   const config: any = {
     responsive: true,
