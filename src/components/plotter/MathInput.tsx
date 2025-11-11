@@ -111,14 +111,16 @@ export const MathInput = forwardRef<MathInputRef, MathInputProps>(
     return createElement('math-field', {
       ref: mathfieldRef,
       className: cn(
-        'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors',
+        'w-full rounded-md border border-input bg-transparent shadow-sm transition-colors',
         'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
         'disabled:cursor-not-allowed disabled:opacity-50',
         className
       ),
       style: {
-        fontSize: '14px',
-        padding: '4px 12px',
+        fontSize: '16px',
+        padding: '8px 12px',
+        minHeight: '40px',
+        display: 'block',
       },
       ...(disabled && { disabled: true }),
       children: placeholder,

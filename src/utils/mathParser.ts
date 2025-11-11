@@ -89,12 +89,21 @@ function extractVariables(node: any): string[] {
   function traverse(n: any) {
     if (!n) return;
 
-    if (n.type === 'SymbolNode' && !isConstant(n.name)) {
+    // Only add SymbolNodes that are not constants or functions
+    if (n.type === 'SymbolNode' && !isConstantOrFunction(n.name)) {
       vars.add(n.name);
     }
 
-    // Traverse child nodes
-    if (n.args) {
+    // Skip function name in FunctionNode, but traverse arguments
+    if (n.type === 'FunctionNode') {
+      if (n.args) {
+        n.args.forEach(traverse);
+      }
+      return;
+    }
+
+    // Traverse child nodes for other node types
+    if (n.args && n.type !== 'FunctionNode') {
       n.args.forEach(traverse);
     }
     if (n.content) {
@@ -110,11 +119,22 @@ function extractVariables(node: any): string[] {
 }
 
 /**
- * Check if a name is a known constant
+ * Check if a name is a known constant or function
  */
-function isConstant(name: string): boolean {
+function isConstantOrFunction(name: string): boolean {
   const constants = ['pi', 'e', 'i', 'PI', 'E', 'true', 'false', 'null', 'Infinity', 'NaN'];
-  return constants.includes(name);
+
+  // Common math functions
+  const functions = [
+    'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2',
+    'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
+    'sec', 'csc', 'cot', 'asec', 'acsc', 'acot',
+    'exp', 'log', 'log10', 'log2', 'ln', 'sqrt', 'cbrt',
+    'abs', 'ceil', 'floor', 'round', 'sign', 'pow',
+    'min', 'max', 'mod', 'gcd', 'lcm',
+  ];
+
+  return constants.includes(name) || functions.includes(name);
 }
 
 /**
