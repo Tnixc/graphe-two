@@ -1,6 +1,5 @@
-import { useState } from 'react';
-import { X, Eye, EyeOff, Info } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { useState, useEffect } from 'react';
+import { X, Eye, EyeOff, Info, Code } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
@@ -19,10 +18,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { colormaps, type ColorMap } from '@/utils/colormaps';
+import { MathInput } from './MathInput';
+import { latexToMathjs } from '@/utils/latexConverter';
 
 export interface FunctionData {
   id: string;
-  expression: string;
+  expression: string;  // mathjs expression
+  latex?: string;      // LaTeX representation (optional)
   colormap: string;
   opacity: number;
   visible: boolean;
@@ -40,6 +42,7 @@ interface FunctionInputProps {
 
 /**
  * Component for inputting and configuring a single function
+ * Uses MathLive for WYSIWYG math input
  */
 export function FunctionInput({
   function: func,
@@ -49,21 +52,36 @@ export function FunctionInput({
   onRemove,
   canRemove,
 }: FunctionInputProps) {
-  const [localExpression, setLocalExpression] = useState(func.expression);
+  const [latexValue, setLatexValue] = useState(func.latex || '');
+  const [showRawExpression, setShowRawExpression] = useState(false);
 
-  const handleExpressionChange = (value: string) => {
-    setLocalExpression(value);
-  };
-
-  const handleExpressionBlur = () => {
-    if (localExpression !== func.expression) {
-      onUpdate(func.id, { expression: localExpression });
+  // Convert initial expression to LaTeX if needed
+  useEffect(() => {
+    if (!func.latex && func.expression) {
+      // If we have an expression but no LaTeX, use the expression as-is
+      // (this happens with the default examples)
+      setLatexValue(func.expression);
     }
+  }, []);
+
+  const handleLatexChange = (latex: string) => {
+    setLatexValue(latex);
   };
 
-  const handleExpressionKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleExpressionBlur();
+  const handleLatexBlur = () => {
+    try {
+      // Convert LaTeX to mathjs expression
+      const mathjsExpr = latexToMathjs(latexValue);
+
+      if (mathjsExpr && mathjsExpr !== func.expression) {
+        onUpdate(func.id, {
+          expression: mathjsExpr,
+          latex: latexValue
+        });
+      }
+    } catch (error) {
+      // Conversion failed - will be caught by parser validation
+      console.error('LaTeX conversion error:', error);
     }
   };
 
@@ -80,6 +98,22 @@ export function FunctionInput({
           f{index + 1}
         </Badge>
         <div className="flex-1" />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowRawExpression(!showRawExpression)}
+              >
+                <Code className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {showRawExpression ? 'Show math editor' : 'Show raw expression'}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -105,19 +139,19 @@ export function FunctionInput({
 
       {/* Expression input */}
       <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Label htmlFor={`expr-${func.id}`} className="text-sm">
+        <div className="flex items-start gap-2">
+          <Label htmlFor={`expr-${func.id}`} className="text-sm pt-2">
             z =
           </Label>
-          <Input
-            id={`expr-${func.id}`}
-            value={localExpression}
-            onChange={(e) => handleExpressionChange(e.target.value)}
-            onBlur={handleExpressionBlur}
-            onKeyDown={handleExpressionKeyDown}
-            placeholder="e.g., sin(x*y), x^2 + y^2"
-            className={func.error ? 'border-destructive' : ''}
-          />
+          <div className="flex-1">
+            <MathInput
+              value={latexValue}
+              onChange={handleLatexChange}
+              onBlur={handleLatexBlur}
+              placeholder="x^2 + y^2"
+              className={func.error ? 'border-destructive' : ''}
+            />
+          </div>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -125,17 +159,27 @@ export function FunctionInput({
                   <Info className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
+              <TooltipContent className="max-w-xs" side="left">
                 <div className="space-y-1 text-xs">
-                  <p>Enter a function of x and y</p>
-                  <p className="font-mono">Examples: sin(x*y), x^2 + y^2, atan2(y,x)</p>
-                  <p>Available: sin, cos, tan, exp, log, sqrt, abs, atan2, etc.</p>
+                  <p className="font-semibold">WYSIWYG Math Editor</p>
+                  <p>Type math naturally - it formats as you type!</p>
+                  <p className="font-mono">Try: x^2, sqrt(x), sin(x*y), x/y</p>
+                  <p>Use arrow keys to navigate, / for fractions</p>
                   <p>Constants: pi, e</p>
                 </div>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
+
+        {/* Show raw expression when toggled */}
+        {showRawExpression && func.expression && (
+          <div className="text-xs font-mono p-2 bg-muted rounded">
+            <div className="text-muted-foreground mb-1">mathjs expression:</div>
+            <code>{func.expression}</code>
+          </div>
+        )}
+
         {func.error && (
           <p className="text-xs text-destructive">{func.error}</p>
         )}
