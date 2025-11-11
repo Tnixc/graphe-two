@@ -2,7 +2,8 @@ import {
     CircleAlert,
     Files,
     Gauge,
-    LucideIcon
+    LucideIcon,
+    TrendingUp
 } from 'lucide-react'
 
 type MenuItemType = {
@@ -19,6 +20,11 @@ export const mainMenu: MenuType = [
         title: 'Dashboard',
         url: '/',
         icon: Gauge
+    },
+    {
+        title: '3D Function Plotter',
+        url: '/plotter',
+        icon: TrendingUp
     },
     {
         title: 'Pages',
