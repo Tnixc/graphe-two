@@ -1,4 +1,4 @@
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { mainMenu } from '@/config/menu'
 import { cn } from '@/lib/utils'
 import {
@@ -9,7 +9,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Calculator } from 'lucide-react'
 import { AppLogo } from './app-logo'
 import { AppSidebar } from './app-sidebar'
 import { Button, buttonVariants } from './ui/button'
@@ -17,8 +17,15 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { appConfig, baseUrl } from '@/config/app'
 import GitHub from './icons/github'
 
+const pages = [
+    { path: '/', label: 'Real Functions', description: 'Plot real-valued functions' },
+    { path: '/complex', label: 'Complex Functions', description: 'Plot complex-valued functions' },
+]
+
 export function AppHeader() {
     const location = useLocation()
+    const navigate = useNavigate()
+    const currentPage = pages.find(p => p.path === location.pathname) || pages[0]
 
     return (
         <header className="bg-background sticky top-0 z-50 border-b">
@@ -81,7 +88,36 @@ export function AppHeader() {
                             ))}
                         </nav>
                     </div>
-                    <nav className="flex gap-1">
+                    <nav className="flex gap-1 items-center">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant='ghost'
+                                    className='h-8 gap-2 px-3'>
+                                    <Calculator className='size-4' />
+                                    <span className='hidden sm:inline font-medium'>{currentPage.label}</span>
+                                    <ChevronDown className='size-3' />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align='end' className='min-w-56'>
+                                <DropdownMenuLabel>Function Type</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                {pages.map((page) => (
+                                    <DropdownMenuItem
+                                        key={page.path}
+                                        onClick={() => navigate(page.path)}
+                                        className={cn(
+                                            'cursor-pointer',
+                                            page.path === location.pathname && 'bg-muted'
+                                        )}>
+                                        <div className='flex flex-col'>
+                                            <span className='font-medium'>{page.label}</span>
+                                            <span className='text-xs text-muted-foreground'>{page.description}</span>
+                                        </div>
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                         <a
                             href={appConfig.github.url}
                             title={appConfig.github.title}
