@@ -165,12 +165,12 @@ export default function FunctionPlotter() {
   return (
     <div className="h-screen w-screen flex flex-col md:flex-row overflow-hidden bg-background">
       {/* Left sidebar - Controls */}
-      <div className="w-full md:w-[380px] border-r border-border overflow-y-auto flex-shrink-0 md:h-screen h-auto max-h-[40vh] md:max-h-none">
-        <div className="p-4 space-y-4">
+      <div className="w-full md:w-[320px] border-r border-border overflow-y-auto flex-shrink-0 md:h-screen h-auto max-h-[40vh] md:max-h-none">
+        <div className="p-3 space-y-3">
           {/* Header */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <h1 className="text-xl font-bold">3D Function Plotter</h1>
+              <h1 className="text-lg font-bold">3D Function Plotter</h1>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -295,7 +295,7 @@ export default function FunctionPlotter() {
         </div>
 
         {/* 3D Plot - fills remaining space */}
-        <div className="flex-1 p-4 overflow-hidden">
+        <div className="flex-1 p-2 overflow-hidden">
           <Plot3D
             functions={plotFunctions}
             zRange={zRange}
