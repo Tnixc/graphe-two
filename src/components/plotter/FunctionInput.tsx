@@ -185,8 +185,9 @@ export function FunctionInput({
         )}
       </div>
 
-      {/* Colormap selection */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Colormap and Opacity */}
+      <div className="space-y-3">
+        {/* Colormap selection */}
         <div className="space-y-2">
           <Label htmlFor={`colormap-${func.id}`} className="text-xs">
             Colormap
@@ -223,7 +224,6 @@ export function FunctionInput({
             step={0.05}
             value={[func.opacity]}
             onValueChange={([value]) => onUpdate(func.id, { opacity: value })}
-            className="mt-2"
           />
         </div>
       </div>

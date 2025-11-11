@@ -31,11 +31,17 @@ export function ParameterControls({
   onUpdate,
   onReset,
 }: ParameterControlsProps) {
-  const handleNumberInput = (field: keyof PlotParameters, value: string) => {
-    const num = parseFloat(value);
-    if (!isNaN(num)) {
-      onUpdate({ [field]: num });
-    }
+  // Get current X and Y ranges (assume symmetric for display)
+  const xRange = Math.abs(parameters.xMax);
+  const yRange = Math.abs(parameters.yMax);
+
+  // Handle axis range changes (sets both min and max symmetrically)
+  const handleXRangeChange = (value: number) => {
+    onUpdate({ xMin: -value, xMax: value });
+  };
+
+  const handleYRangeChange = (value: number) => {
+    onUpdate({ yMin: -value, yMax: value });
   };
 
   return (
@@ -48,101 +54,65 @@ export function ParameterControls({
         </Button>
       </div>
 
-      {/* X Domain */}
-      <div className="space-y-3">
-        <Label className="text-sm font-medium">X Axis</Label>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="xMin" className="text-xs text-muted-foreground w-10">
-              Min
-            </Label>
-            <Slider
-              min={-20}
-              max={0}
-              step={0.5}
-              value={[parameters.xMin]}
-              onValueChange={([value]) => onUpdate({ xMin: value })}
-              className="flex-1"
-            />
-            <Input
-              id="xMin"
-              type="number"
-              value={parameters.xMin}
-              onChange={(e) => handleNumberInput('xMin', e.target.value)}
-              className="h-7 w-16 text-xs"
-              step="0.1"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="xMax" className="text-xs text-muted-foreground w-10">
-              Max
-            </Label>
-            <Slider
-              min={0}
-              max={20}
-              step={0.5}
-              value={[parameters.xMax]}
-              onValueChange={([value]) => onUpdate({ xMax: value })}
-              className="flex-1"
-            />
-            <Input
-              id="xMax"
-              type="number"
-              value={parameters.xMax}
-              onChange={(e) => handleNumberInput('xMax', e.target.value)}
-              className="h-7 w-16 text-xs"
-              step="0.1"
-            />
-          </div>
+      {/* X Axis */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium">X Axis</Label>
+          <Badge variant="secondary" className="text-xs font-mono">
+            [{-xRange}, {xRange}]
+          </Badge>
+        </div>
+        <div className="flex items-center gap-2">
+          <Slider
+            min={0}
+            max={50}
+            step={0.5}
+            value={[xRange]}
+            onValueChange={([value]) => handleXRangeChange(value)}
+            className="flex-1"
+          />
+          <Input
+            type="number"
+            value={xRange}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value);
+              if (!isNaN(val) && val >= 0) handleXRangeChange(val);
+            }}
+            className="h-7 w-16 text-xs"
+            step="0.5"
+            min="0"
+          />
         </div>
       </div>
 
-      {/* Y Domain */}
-      <div className="space-y-3">
-        <Label className="text-sm font-medium">Y Axis</Label>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="yMin" className="text-xs text-muted-foreground w-10">
-              Min
-            </Label>
-            <Slider
-              min={-20}
-              max={0}
-              step={0.5}
-              value={[parameters.yMin]}
-              onValueChange={([value]) => onUpdate({ yMin: value })}
-              className="flex-1"
-            />
-            <Input
-              id="yMin"
-              type="number"
-              value={parameters.yMin}
-              onChange={(e) => handleNumberInput('yMin', e.target.value)}
-              className="h-7 w-16 text-xs"
-              step="0.1"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="yMax" className="text-xs text-muted-foreground w-10">
-              Max
-            </Label>
-            <Slider
-              min={0}
-              max={20}
-              step={0.5}
-              value={[parameters.yMax]}
-              onValueChange={([value]) => onUpdate({ yMax: value })}
-              className="flex-1"
-            />
-            <Input
-              id="yMax"
-              type="number"
-              value={parameters.yMax}
-              onChange={(e) => handleNumberInput('yMax', e.target.value)}
-              className="h-7 w-16 text-xs"
-              step="0.1"
-            />
-          </div>
+      {/* Y Axis */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium">Y Axis</Label>
+          <Badge variant="secondary" className="text-xs font-mono">
+            [{-yRange}, {yRange}]
+          </Badge>
+        </div>
+        <div className="flex items-center gap-2">
+          <Slider
+            min={0}
+            max={50}
+            step={0.5}
+            value={[yRange]}
+            onValueChange={([value]) => handleYRangeChange(value)}
+            className="flex-1"
+          />
+          <Input
+            type="number"
+            value={yRange}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value);
+              if (!isNaN(val) && val >= 0) handleYRangeChange(val);
+            }}
+            className="h-7 w-16 text-xs"
+            step="0.5"
+            min="0"
+          />
         </div>
       </div>
 
@@ -224,7 +194,7 @@ export function ParameterControls({
       {/* Info */}
       <div className="pt-2 border-t">
         <p className="text-xs text-muted-foreground">
-          Use sliders for quick adjustments. Higher resolution = smoother plots but slower.
+          Axis sliders create symmetric ranges (±value). Higher resolution = smoother but slower.
         </p>
       </div>
     </Card>
