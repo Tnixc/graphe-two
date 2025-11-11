@@ -182,10 +182,10 @@ export default function FunctionPlotter() {
                     <div className="space-y-2 text-sm">
                       <p className="font-semibold">Quick Guide:</p>
                       <ul className="list-disc list-inside space-y-1 text-xs">
-                        <li>Enter functions using x and y variables</li>
-                        <li>Use: sin, cos, tan, exp, log, sqrt, abs, etc.</li>
-                        <li>Try: sin(x*y), x^2 - y^2, atan2(y,x)</li>
-                        <li>Add multiple functions to compare</li>
+                        <li>Enter: z = ..., f(x,y) = ..., or just the expression</li>
+                        <li>Implicit multiplication: xy means x*y, 2x means 2*x</li>
+                        <li>Functions: sin, cos, tan, exp, log, sqrt, abs, etc.</li>
+                        <li>Try: xy, sin(xy), x^2 + y^2</li>
                         <li>Rotate plot by clicking and dragging</li>
                       </ul>
                     </div>
@@ -246,15 +246,15 @@ export default function FunctionPlotter() {
             <div className="space-y-1">
               <button
                 className="w-full text-left p-2 hover:bg-muted rounded text-xs transition-colors"
-                onClick={() => updateFunction(functions[0].id, { expression: 'sin(x) * cos(y)' })}
+                onClick={() => updateFunction(functions[0].id, { expression: 'z = sin(x)cos(y)' })}
               >
-                <code className="font-mono text-xs">sin(x) * cos(y)</code>
+                <code className="font-mono text-xs">z = sin(x)cos(y)</code>
               </button>
               <button
                 className="w-full text-left p-2 hover:bg-muted rounded text-xs transition-colors"
-                onClick={() => updateFunction(functions[0].id, { expression: 'x^2 + y^2' })}
+                onClick={() => updateFunction(functions[0].id, { expression: 'f(x,y) = x^2 + y^2' })}
               >
-                <code className="font-mono text-xs">x^2 + y^2</code>
+                <code className="font-mono text-xs">f(x,y) = x^2 + y^2</code>
               </button>
               <button
                 className="w-full text-left p-2 hover:bg-muted rounded text-xs transition-colors"
@@ -264,9 +264,9 @@ export default function FunctionPlotter() {
               </button>
               <button
                 className="w-full text-left p-2 hover:bg-muted rounded text-xs transition-colors"
-                onClick={() => updateFunction(functions[0].id, { expression: 'atan2(y, x)' })}
+                onClick={() => updateFunction(functions[0].id, { expression: 'xy' })}
               >
-                <code className="font-mono text-xs">atan2(y, x)</code>
+                <code className="font-mono text-xs">xy</code>
               </button>
             </div>
           </div>
