@@ -14,42 +14,91 @@ export interface ParsedExpression {
  * Examples: xy → x*y, 2x → 2*x, xsin(x) → x*sin(x)
  */
 function addImplicitMultiplication(expr: string): string {
-  let result = expr;
+  const functions = ['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2',
+                     'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
+                     'sec', 'csc', 'cot', 'asec', 'acsc', 'acot',
+                     'exp', 'log', 'log10', 'log2', 'ln', 'sqrt', 'cbrt',
+                     'abs', 'ceil', 'floor', 'round', 'sign', 'pow',
+                     'min', 'max', 'mod', 'gcd', 'lcm'];
 
-  // Pattern 1: number followed by letter/function (2x, 3sin)
-  result = result.replace(/(\d)([a-zA-Z])/g, '$1*$2');
+  const constants = ['pi', 'e', 'i', 'PI', 'E', 'Infinity', 'NaN'];
 
-  // Pattern 2: letter followed by letter (xy, xsin)
-  // But avoid breaking function names - only insert * between single letters or before known functions
-  const functions = ['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2', 'sinh', 'cosh', 'tanh',
-                     'exp', 'log', 'ln', 'sqrt', 'abs', 'ceil', 'floor', 'round', 'pow', 'min', 'max', 'mod'];
+  let result = '';
+  let i = 0;
 
-  // Insert * before function names when preceded by a letter or digit
-  for (const fn of functions) {
-    const regex = new RegExp(`([a-zA-Z0-9])${fn}\\(`, 'g');
-    result = result.replace(regex, `$1*${fn}(`);
-  }
+  while (i < expr.length) {
+    const char = expr[i];
 
-  // Pattern 3: Single letter followed by single letter (xy → x*y)
-  // But don't break multi-letter identifiers
-  result = result.replace(/([a-zA-Z])([a-zA-Z])(?![a-zA-Z])/g, (match, p1, p2) => {
-    // Check if p2 is the start of a function name
+    // Check if we're at the start of a function name
+    let foundFunction = false;
     for (const fn of functions) {
-      if (fn.startsWith(p2)) {
-        return match; // Don't insert * if it's the start of a function
+      if (expr.substring(i).startsWith(fn + '(')) {
+        result += fn + '(';
+        i += fn.length + 1;
+        foundFunction = true;
+        break;
       }
     }
-    // Check if p2 is a known constant
-    if (['e', 'i'].includes(p2)) {
-      return match;
-    }
-    return `${p1}*${p2}`;
-  });
+    if (foundFunction) continue;
 
-  // Pattern 4: Closing paren followed by letter or number: )x, )2, )(
-  result = result.replace(/\)(\d)/g, ')*$1');
-  result = result.replace(/\)([a-zA-Z])/g, ')*$1');
-  result = result.replace(/\)\(/g, ')*(');
+    // Check if we're at the start of a constant
+    let foundConstant = false;
+    for (const constant of constants) {
+      if (expr.substring(i).startsWith(constant) &&
+          (i + constant.length >= expr.length || !/[a-zA-Z0-9]/.test(expr[i + constant.length]))) {
+        result += constant;
+        i += constant.length;
+        foundConstant = true;
+        break;
+      }
+    }
+    if (foundConstant) continue;
+
+    // Add current character
+    result += char;
+
+    // Check if we need to insert * after this character
+    if (i + 1 < expr.length) {
+      const nextChar = expr[i + 1];
+      const needsMult = (
+        // digit followed by letter: 2x, 2sin
+        (/\d/.test(char) && /[a-zA-Z]/.test(nextChar)) ||
+        // letter followed by digit: x2
+        (/[a-zA-Z]/.test(char) && /\d/.test(nextChar)) ||
+        // letter followed by letter (single vars): xy (checked below)
+        (/[a-zA-Z]/.test(char) && /[a-zA-Z]/.test(nextChar)) ||
+        // closing paren followed by anything: )x, )2, )(
+        (char === ')' && (nextChar === '(' || /[a-zA-Z0-9]/.test(nextChar)))
+      );
+
+      if (needsMult) {
+        // Don't insert * if next char starts a function or constant (already handled above)
+        let skipMult = false;
+
+        // Check if current position ends a function or constant we just processed
+        for (const fn of functions) {
+          if (expr.substring(i + 1).startsWith(fn + '(')) {
+            skipMult = true;
+            break;
+          }
+        }
+
+        for (const constant of constants) {
+          if (expr.substring(i + 1).startsWith(constant) &&
+              (i + 1 + constant.length >= expr.length || !/[a-zA-Z0-9]/.test(expr[i + 1 + constant.length]))) {
+            skipMult = true;
+            break;
+          }
+        }
+
+        if (!skipMult) {
+          result += '*';
+        }
+      }
+    }
+
+    i++;
+  }
 
   return result;
 }
