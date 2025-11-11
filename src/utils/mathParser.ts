@@ -10,8 +10,76 @@ export interface ParsedExpression {
 }
 
 /**
+ * Preprocess expression to handle implicit multiplication
+ * Examples: xy → x*y, 2x → 2*x, xsin(x) → x*sin(x)
+ */
+function addImplicitMultiplication(expr: string): string {
+  let result = expr;
+
+  // Pattern 1: number followed by letter/function (2x, 3sin)
+  result = result.replace(/(\d)([a-zA-Z])/g, '$1*$2');
+
+  // Pattern 2: letter followed by letter (xy, xsin)
+  // But avoid breaking function names - only insert * between single letters or before known functions
+  const functions = ['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2', 'sinh', 'cosh', 'tanh',
+                     'exp', 'log', 'ln', 'sqrt', 'abs', 'ceil', 'floor', 'round', 'pow', 'min', 'max', 'mod'];
+
+  // Insert * before function names when preceded by a letter or digit
+  for (const fn of functions) {
+    const regex = new RegExp(`([a-zA-Z0-9])${fn}\\(`, 'g');
+    result = result.replace(regex, `$1*${fn}(`);
+  }
+
+  // Pattern 3: Single letter followed by single letter (xy → x*y)
+  // But don't break multi-letter identifiers
+  result = result.replace(/([a-zA-Z])([a-zA-Z])(?![a-zA-Z])/g, (match, p1, p2) => {
+    // Check if p2 is the start of a function name
+    for (const fn of functions) {
+      if (fn.startsWith(p2)) {
+        return match; // Don't insert * if it's the start of a function
+      }
+    }
+    // Check if p2 is a known constant
+    if (['e', 'i'].includes(p2)) {
+      return match;
+    }
+    return `${p1}*${p2}`;
+  });
+
+  // Pattern 4: Closing paren followed by letter or number: )x, )2, )(
+  result = result.replace(/\)(\d)/g, ')*$1');
+  result = result.replace(/\)([a-zA-Z])/g, ')*$1');
+  result = result.replace(/\)\(/g, ')*(');
+
+  return result;
+}
+
+/**
+ * Extract the right-hand side of an equation
+ * Handles formats: "z = ...", "f(x,y) = ...", or just "..."
+ */
+function extractRHS(expression: string): string {
+  const trimmed = expression.trim();
+
+  // Check for equals sign
+  const equalsIndex = trimmed.indexOf('=');
+  if (equalsIndex === -1) {
+    // No equals sign, return as-is
+    return trimmed;
+  }
+
+  // Extract right-hand side
+  const rhs = trimmed.substring(equalsIndex + 1).trim();
+  if (!rhs) {
+    throw new Error('Empty expression after "="');
+  }
+
+  return rhs;
+}
+
+/**
  * Parse a mathematical expression and validate it
- * @param expression - The math expression string (e.g., "sin(x*y)", "x^2 + y^2")
+ * @param expression - The math expression string (e.g., "sin(x*y)", "x^2 + y^2", "z = x^2 + y^2", "f(x,y) = xy")
  * @returns ParsedExpression object with compiled function
  * @throws Error if expression is invalid
  */
@@ -23,11 +91,17 @@ export function parseExpression(expression: string): ParsedExpression {
       throw new Error('Expression cannot be empty');
     }
 
+    // Extract RHS if there's an equation format
+    let rhs = extractRHS(trimmed);
+
+    // Add implicit multiplication
+    rhs = addImplicitMultiplication(rhs);
+
     // Parse and compile the expression
-    const compiled = math.compile(trimmed);
+    const compiled = math.compile(rhs);
 
     // Extract variable names (should be 'x' and 'y' for our use case)
-    const node = math.parse(trimmed);
+    const node = math.parse(rhs);
     const variables = extractVariables(node);
 
     // Validate that expression uses x and y (or neither for constants)
@@ -38,7 +112,7 @@ export function parseExpression(expression: string): ParsedExpression {
     }
 
     return {
-      expression: trimmed,
+      expression: rhs,
       compiled,
       variables,
     };
