@@ -318,6 +318,12 @@ export default function FunctionPlotter() {
                     <span className="text-xs text-muted-foreground">Plot complex-valued functions</span>
                   </div>
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/complex-plane')}>
+                  <div className="flex flex-col">
+                    <span className="font-medium">Complex Plane</span>
+                    <span className="text-xs text-muted-foreground">Plot complex numbers as vectors</span>
+                  </div>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <Button
